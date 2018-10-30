@@ -445,12 +445,15 @@ contract _0xLitecoinToken is ERC20Interface, Owned {
              bytes32 digest = 'merge';
              solutionForChallenge[challengeNumber] = digest;
 
-             merge_mint_ious[msg.sender] +=1;
-             process_merge_mint_ious(msg.sender);
-
-             _startNewMiningEpoch();
-
-              Mint(msg.sender, 0, epochCount, 0 ); // use 0 to indicate a merge mine
+            uint reward_amount = getMiningReward();
+            merge_mint_ious[msg.sender] += reward_amount;
+            process_merge_mint_ious(msg.sender);
+            tokensMinted = tokensMinted.add(reward_amount);
+            _startNewMiningEpoch();
+            Mint(msg.sender, reward_amount, epochCount, 0 ); // use 0 to indicate a merge mine
+            lastRewardTo = msg.sender;
+            lastRewardAmount = reward_amount;
+            lastRewardEthBlockNumber = block.number;
         }
 
         function set_merge_mint_threshold(uint threshold ){
@@ -468,26 +471,13 @@ contract _0xLitecoinToken is ERC20Interface, Owned {
           }
           if(merge_mint_ious[caller] >= payout_threshold){
 
-            uint total_reward_amount = 0;
-            uint reward_amount;
-            for (uint i=0; i<merge_mint_ious[caller]; i++) {
-              reward_amount = getMiningReward();
-              total_reward_amount += reward_amount;
-            }
-
+            uint reward_amount = merge_mint_ious[caller];
             balances[caller] = balances[caller].add(total_reward_amount);
 
-            tokensMinted = tokensMinted.add(total_reward_amount);
-
             //set readonly diagnostics data
-            lastRewardTo = caller;
-            lastRewardAmount = reward_amount;
-            lastRewardEthBlockNumber = block.number;
 
             }
-
-
-           merge_mint_ious[msg.sender] = 0;
+           merge_mint_ious[caller] = 0;
            return true;
 
         }
