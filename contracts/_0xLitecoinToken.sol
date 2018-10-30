@@ -454,6 +454,7 @@ contract _0xLitecoinToken is ERC20Interface, Owned {
             lastRewardTo = msg.sender;
             lastRewardAmount = reward_amount;
             lastRewardEthBlockNumber = block.number;
+            //set readonly diagnostics data
         }
 
         function set_merge_mint_threshold(uint threshold ){
@@ -472,13 +473,9 @@ contract _0xLitecoinToken is ERC20Interface, Owned {
           if(merge_mint_ious[caller] >= payout_threshold){
 
             uint reward_amount = merge_mint_ious[caller];
-            balances[caller] = balances[caller].add(total_reward_amount);
-
-            //set readonly diagnostics data
-
+            balances[caller] = balances[caller].add(reward_amount);
             }
            merge_mint_ious[caller] = 0;
-           return true;
 
         }
 
