@@ -49,9 +49,11 @@ contract Ownable {
    * @dev The Ownable constructor sets the original `owner` of the contract to the sender
    * account.
    */
-  function Ownable() {
-    owner = msg.sender;
-  }
+//  function Ownable() {
+    constructor() public
+    {
+        owner = msg.sender;
+    }
 
 
   /**
@@ -59,7 +61,7 @@ contract Ownable {
    */
   modifier onlyOwner() {
     if (msg.sender != owner) {
-      throw;
+      revert();
     }
     _;
   }
@@ -69,7 +71,7 @@ contract Ownable {
    * @dev Allows the current owner to transfer control of the contract to a newOwner.
    * @param newOwner The address to transfer ownership to.
    */
-  function transferOwnership(address newOwner) onlyOwner {
+  function transferOwnership(address newOwner) onlyOwner public {
     if (newOwner != address(0)) {
       owner = newOwner;
     }
@@ -97,7 +99,7 @@ contract ERC918Interface {
   function getMiningReward() public constant returns (uint);
   function balanceOf(address tokenOwner) public constant returns (uint balance);
   function merge() public returns (bool success);
-  uint public lastRewardAmount;
+// uint public lastRewardAmount;
 
   function mint(uint256 nonce, bytes32 challenge_digest) public returns (bool success);
 
@@ -113,7 +115,7 @@ contract MintHelper is Ownable {
 
   using SafeMath for uint;
 
-    address public mintableToken;
+//  address public mintableToken;
 
     address public payoutsWallet;
     address public minterWallet;
@@ -121,22 +123,22 @@ contract MintHelper is Ownable {
     uint public minterFeePercent;
 
 
-    function MintHelper(address mToken, address pWallet, address mWallet)
+    constructor(address pWallet, address mWallet) public
     {
-      mintableToken = mToken;
+//    mintableToken = mToken;
       payoutsWallet = pWallet;
       minterWallet = mWallet;
-      minterFeePercent = 6;
+      minterFeePercent = 2;
     }
 
-    function setMintableToken(address mToken)
+/*  function setMintableToken(address mToken)
     public onlyOwner
     returns (bool)
     {
       mintableToken = mToken;
       return true;
-    }
-
+    } 
+*/
     function setPayoutsWallet(address pWallet)
     public onlyOwner
     returns (bool)
@@ -164,8 +166,8 @@ contract MintHelper is Ownable {
 
 
 
-    function proxyMint(uint256 nonce, bytes32 challenge_digest )
-    public onlyOwner
+    function proxyMint( uint256 nonce, bytes32 challenge_digest, address mintableToken )
+    public /* onlyOwner */
     returns (bool)
     {
       //identify the rewards that will be won and how to split them up
@@ -175,7 +177,7 @@ contract MintHelper is Ownable {
       uint payoutReward = totalReward.sub(minterReward);
 
       // get paid in new tokens
-      require(ERC918Interface(mintableToken).mint(nonce, challenge_digest));
+      require(ERC918Interface(mintableToken).mint(nonce, challenge_digest ));
 
       //transfer the tokens to the correct wallets
       require(ERC20Interface(mintableToken).transfer(minterWallet, minterReward));
@@ -186,7 +188,7 @@ contract MintHelper is Ownable {
     }
 
 
-    function proxyMergeMint(uint256 nonce, bytes32 challenge_digest, address[] tokens)
+/*  function proxyMergeMint(uint256 nonce, bytes32 challenge_digest, address[] tokens)
     public onlyOwner
     returns (bool)
     {
@@ -222,7 +224,7 @@ contract MintHelper is Ownable {
 
       return true;
 
-    }
+    } */
 
 
 
@@ -230,7 +232,7 @@ contract MintHelper is Ownable {
     function withdraw()
     public onlyOwner
     {
-        msg.sender.transfer(this.balance);
+        msg.sender.transfer(address(this).balance);      
     }
 
     //send tokens out
@@ -241,7 +243,7 @@ contract MintHelper is Ownable {
      return ERC20Interface(_tokenAddr).transfer(dest, value);
     }
 
-    function multisend(address _tokenAddr, address[] dests, uint256[] values)
+/*  function multisend(address _tokenAddr, address[] dests, uint256[] values)
     onlyOwner
       returns (uint256) {
         uint256 i = 0;
@@ -250,5 +252,6 @@ contract MintHelper is Ownable {
            i += 1;
         }
         return (i);
-    }
+    } */
+    
 }
