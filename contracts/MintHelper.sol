@@ -138,20 +138,19 @@ contract MintHelper is Ownable {
 //  }
 //
 
+//identify the rewards that will be won and how to split them up:
 
     function proxyMint( uint256 nonce, bytes32 challenge_digest, address mintableToken )
     public /* onlyOwner */
     returns (bool)
     {
-      //identify the rewards that will be won and how to split them up
+    
+      // to get miner's payout address from first 20 bytes of the solution nonce
+      address payoutAddress = address( uint160(nonce) );
       
-      address payoutAddress = address( uint160(nonce) );                    // miner's payout address from first 20
-                                                                            // bytes of the solution nonce
+      uint totalReward = ERC918Interface(mintableToken).getMiningReward();  // get current reward from the ERC918 contract
       
-      uint totalReward = ERC918Interface(mintableToken).getMiningReward();  // get current reward in tokens
-      
-      //uint minterReward = totalReward.mul(donatePercent).div(100);        // developer gets 2% auto-donation
-      uint minterReward = totalReward.mul(2).div(100);
+      uint minterReward = totalReward.mul(2).div(100);                      // developer gets 2% auto-donation
       
       uint payoutReward = totalReward.sub(minterReward);                    // the miner gets 98% !
 
