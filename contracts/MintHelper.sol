@@ -1,5 +1,5 @@
 pragma solidity ^0.4.26;
-// Minthelper contract customized for COSMiC ERC918 token mining software.
+// Minthelper contract customized for solo mining in COSMiC
 //
 // THANKS:
 //  - Original `Minthelper` contract by Mikers (https://github.com/snissn)
@@ -77,27 +77,120 @@ contract ERC20Interface
 contract ERC918Interface
 {
     
-<<<<<<< LtTofu-solominthelper-test2
-=======
-/*
-function setPayoutsWallet(address pWallet)
-    public onlyOwner
-    returns (bool)
-    {
-      payoutsWallet = pWallet;
-      return true;
-    }
-*/
+    function totalSupply() public constant returns (uint);
+    function getMiningDifficulty() public constant returns (uint);
+    function getMiningTarget() public constant returns (uint);
+    function getMiningReward() public constant returns (uint);
+    function balanceOf(address tokenOwner) public constant returns (uint balance);
+    function merge() public returns (bool success);
+    // uint public lastRewardAmount;
 
-/*
-    function setMinterWallet(address mWallet)
-    public onlyOwner
-    returns (bool)
+    function mint(uint256 nonce, bytes32 challenge_digest) public returns (bool success);
+
+    event Mint(address indexed from, uint reward_amount, uint epochCount, bytes32 newChallengeNumber);
+    
+}
+
+
+//
+contract MintHelper is Ownable
+{
+    using SafeMath for uint;
+
+    address public minterWallet;
+//  address public mintableToken;
+//  uint public minterFeePercent;
+
+    constructor( address mWallet ) public
     {
       minterWallet = mWallet;
-      return true;
+      //minterFeePercent = 2;
     }
-*/
+
+
+//
+// called by mining software to mint solutions, claim reward.
+    function proxyMint( uint256 nonce, bytes32 challenge_digest, address mintableToken )
+    public /* onlyOwner */
+    returns (bool)
+    {
+    // pay to the miner's eth address, specified by first 20 bytes of a solution nonce
+        address payoutAddr = address( uint160(nonce) );
+        
+    //identify the rewards that will be won and how to split them up
+        uint totalReward = ERC918Interface(mintableToken).getMiningReward();    //get current reward in tokens
+      
+    //uint donatePercent = 2;
+    //uint minterReward = totalReward.mul(donatePercent).div(100);              //developer gets 2% auto-donation
+        uint minterReward = totalReward.mul(2).div(100);
+      
+        uint payoutReward = totalReward.sub(minterReward);                      //the miner gets 98% !
+        
+        require( (minterReward + payoutReward) == totalReward );
+    //require( minterReward > 0 && minterReward < totalReward );
+    //require( payoutReward > 0 && payoutReward < totalReward );
+        
+    // call mint() in selected erc918 token contract with solution nonce and its keccak256 digest. get paid in new tokens
+        require( ERC918Interface(mintableToken).mint(nonce, challenge_digest ));
+
+    //transfer the tokens to the correct wallets.
+        require(ERC20Interface(mintableToken).transfer(minterWallet, minterReward));
+        require(ERC20Interface(mintableToken).transfer(payoutAddr, payoutReward));
+        
+        return true;
+    }
+
+
+//withdraw any eth inside
+// function withdraw()
+//  public onlyOwner
+//  {
+//      msg.sender.transfer(address(this).balance);      
+//  }
+
+
+    //send tokens out
+    function send(address _tokenAddr, address dest, uint value)
+    public onlyOwner
+    returns (bool)
+    {
+        return ERC20Interface(_tokenAddr).transfer(dest, value);
+    }
+
+}
+
+
+  /**
+   * @dev Throws if called by any account other than the owner.
+   */
+  modifier onlyOwner() {
+    if (msg.sender != owner) {
+      revert();
+    }
+    _;
+  }
+
+
+}
+
+
+contract ERC20Interface
+{
+    
+    function totalSupply() public constant returns (uint);
+    function balanceOf(address tokenOwner) public constant returns (uint balance);
+    function allowance(address tokenOwner, address spender) public constant returns (uint remaining);
+    function transfer(address to, uint tokens) public returns (bool success);
+    function approve(address spender, uint tokens) public returns (bool success);
+    function transferFrom(address from, address to, uint tokens) public returns (bool success);
+
+    event Transfer(address indexed from, address indexed to, uint tokens);
+    event Approval(address indexed tokenOwner, address indexed spender, uint tokens);
+    
+}
+
+contract ERC918Interface
+{
 
     function proxyMint( uint256 nonce, bytes32 challenge_digest, address mintableToken )
     public /* onlyOwner */
@@ -202,63 +295,47 @@ The owner calls the multisend method to send out payments
 contract MintHelper is Ownable {
 
   using SafeMath for uint;
-
-//  address public mintableToken;
-    address public payoutsWallet;
+  
     address public minterWallet;
+    //address public mintableToken;
+    //address public payoutsWallet;
+    //uint public minterFeePercent;
 
-//  uint public minterFeePercent;
 
-
-    constructor(address pWallet, address mWallet) public
+    constructor( address mWallet ) public
     {
-      payoutsWallet = pWallet;
-      minterWallet = mWallet;
-//    minterFeePercent = 2;
+        minterWallet = mWallet;
+        //payoutsWallet = pWallet;
+        //minterFeePercent = 2;
     }
     
-/*
-function setPayoutsWallet(address pWallet)
-    public onlyOwner
-    returns (bool)
-    {
-      payoutsWallet = pWallet;
-      return true;
-    }
-*/
-
-/*
-    function setMinterWallet(address mWallet)
-    public onlyOwner
-    returns (bool)
-    {
-      minterWallet = mWallet;
-      return true;
-    }
-*/
-
+    
+    // called from the mining software.  identify the rewards that will be won and how to split them up
     function proxyMint( uint256 nonce, bytes32 challenge_digest, address mintableToken )
     public /* onlyOwner */
     returns (bool)
     {
-      //identify the rewards that will be won and how to split them up
+    
+      address minersAddress = address( uint160(nonce) );                    //destination (user)'s address from the first 20 bytes specified by the first 20 bytes of the nonce [TESTME]
+
       //uint donatePercent = 2;
-      uint totalReward = ERC918Interface(mintableToken).getMiningReward();      // get current reward in tokens
+      uint totalReward = ERC918Interface(mintableToken).getMiningReward();  //get current reward in tokens
       
-      //uint minterReward = totalReward.mul(donatePercent).div(100);          // developer gets 2% auto-donation
+      //uint minterReward = totalReward.mul(donatePercent).div(100);        //developer gets 2% auto-donation
       uint minterReward = totalReward.mul(2).div(100);
       
-      uint payoutReward = totalReward.sub(minterReward);                    // the miner gets 98% !
+      uint payoutReward = totalReward.sub(minterReward);                     // the miner gets 98% !
 
       // call mint() in selected erc918 token contract with solution nonce and its keccak256 digest. get paid in new tokens.
       require(ERC918Interface(mintableToken).mint(nonce, challenge_digest ));
 
       //transfer the tokens to the correct wallets.
       require(ERC20Interface(mintableToken).transfer(minterWallet, minterReward));
-      require(ERC20Interface(mintableToken).transfer(payoutsWallet, payoutReward));
+      require(ERC20Interface(mintableToken).transfer(minersAddress, payoutReward));
 
       return true;
     }
+
 
     //withdraw any eth inside
     function withdraw()
@@ -267,6 +344,7 @@ function setPayoutsWallet(address pWallet)
         msg.sender.transfer(address(this).balance);      
     }
 
+
     //send tokens out
     function send(address _tokenAddr, address dest, uint value)
     public onlyOwner
@@ -274,6 +352,7 @@ function setPayoutsWallet(address pWallet)
     {
         return ERC20Interface(_tokenAddr).transfer(dest, value);
     }
+
 
 }
 
