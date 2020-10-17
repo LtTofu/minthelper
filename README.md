@@ -2,12 +2,12 @@
  ## 0xLitecoin 
  [Deployed on Ethereum](https://etherscan.io/address/0xb6ed7644c69416d67b522e20bc294a9a9b405b31)
  
-![0xbitcoin_small](https://user-images.githubusercontent.com/36060731/35717032-b47d34d0-07aa-11e8-9d1a-48dafbbb2ca0.png)
+![Dummy0xBitcoin_small](https://user-images.githubusercontent.com/36060731/35717032-b47d34d0-07aa-11e8-9d1a-48dafbbb2ca0.png)
 
 
 This is intended to be the first Merge-Mined token as a proof of concept for new merge mined tokens, and as the creation of a non-forgable, scarce, digital asset powered by the Ethereum blockchain.
 
-the idea is that the miner uses https://github.com/0xbitcoin/mint-helper/blob/master/contracts/MintHelper.sol to call mint() and then mergeMint() in the same transaction
+the idea is that the miner uses https://github.com/Dummy0xBitcoin/mint-helper/blob/master/contracts/MintHelper.sol to call mint() and then mergeMint() in the same transaction
 
  
  #### An ERC20 token that is mined using PoW through a SmartContract 
@@ -23,7 +23,7 @@ the idea is that the miner uses https://github.com/0xbitcoin/mint-helper/blob/ma
    
  #### How does it work?
  
-Typically, ERC20 tokens will grant all tokens to the owner or will have an ICO and demand that large amounts of Ether be sent to the owner.   Instead of granting tokens to the 'contract owner', all 0xbitcoin tokens are locked within the smart contract initially.  These tokens are dispensed, 50 at a time, by calling the function 'mint' and using Proof of Work, just like mining bitcoin.  Here is what that looks like: 
+Typically, ERC20 tokens will grant all tokens to the owner or will have an ICO and demand that large amounts of Ether be sent to the owner.   Instead of granting tokens to the 'contract owner', all Dummy0xBitcoin tokens are locked within the smart contract initially.  These tokens are dispensed, 50 at a time, by calling the function 'mint' and using Proof of Work, just like mining bitcoin.  Here is what that looks like: 
 
 
      function mint(uint256 nonce, bytes32 challenge_digest) public returns (bool success) {
@@ -64,9 +64,9 @@ Typically, ERC20 tokens will grant all tokens to the owner or will have an ICO a
     }
  
  
-As you can see, a special number called a 'nonce' has to be passed into this function in order for tokens to be dispensed.  This number has to fit a special 'puzzle' similar to a sudoku puzzle, and this is called Proof of Work.   To find this special number, it is necessary to run a mining program.  A cpu miner exists for mining 0xbitcoin tokens and it can be downloaded here: 
+As you can see, a special number called a 'nonce' has to be passed into this function in order for tokens to be dispensed.  This number has to fit a special 'puzzle' similar to a sudoku puzzle, and this is called Proof of Work.   To find this special number, it is necessary to run a mining program.  A cpu miner exists for mining Dummy0xBitcoin tokens and it can be downloaded here: 
 
-https://github.com/0xbitcoin/0xbitcoin-miner
+https://github.com/Dummy0xBitcoin/Dummy0xBitcoin-miner
 
 
  
@@ -77,7 +77,7 @@ https://github.com/0xbitcoin/0xbitcoin-miner
 
 
 ### Transfer ERC20 Tokens 
-https://0xbitcoin.org/wallet
+https://Dummy0xBitcoin.org/wallet
  
  
  
